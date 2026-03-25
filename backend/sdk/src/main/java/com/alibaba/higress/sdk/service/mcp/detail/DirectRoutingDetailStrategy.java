@@ -58,6 +58,7 @@ public class DirectRoutingDetailStrategy extends AbstractMcpServerDetailStrategy
         String path = route.getRewrite().getPath();
         if (StringUtils.equals(transportType, McpConstants.MCP_TRANSPORT_SSE)) {
             path = StringUtils.join(path, generateUpstreamPathPrefix());
+            path = StringUtils.join("/", StringUtils.stripStart(path, "/"));
         }
         config.setPath(path);
     }
