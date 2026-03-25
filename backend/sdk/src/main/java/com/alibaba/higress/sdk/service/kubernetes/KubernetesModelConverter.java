@@ -1679,26 +1679,32 @@ public class KubernetesModelConverter {
         }
     }
 
-    public Service v1Service2Service(V1Service v1Service) {
-        Service result = new Service();
+    public List<Service> v1Service2Service(V1Service v1Service) {
+        Service serviceTemplate = new Service();
         String fqdn = String.format(SERVICE_FQDN_TEMPLATE, v1Service.getMetadata().getName(),
             v1Service.getMetadata().getNamespace(), kubernetesClientService.getClusterDomainSuffix());
-        result.setName(fqdn);
-        result.setNamespace(v1Service.getMetadata().getNamespace());
+        serviceTemplate.setName(fqdn);
+        serviceTemplate.setNamespace(v1Service.getMetadata().getNamespace());
         V1ServiceSpec spec = v1Service.getSpec();
         if (Objects.isNull(spec)) {
             throw new BusinessException("Service spec is null.");
         }
+        if (StringUtils.isNotBlank(v1Service.getMetadata().getResourceVersion())) {
+            serviceTemplate.setVersion(Integer.valueOf(v1Service.getMetadata().getResourceVersion()));
+        }
+        serviceTemplate.setEndpoints(spec.getClusterIPs());
+
         List<V1ServicePort> ports = spec.getPorts();
         if (CollectionUtils.isNotEmpty(ports)) {
-            result.setPort(ports.get(0).getPort());
+            return ports.stream()
+                .map(port -> Service.builder().namespace(serviceTemplate.getNamespace()).name(serviceTemplate.getName())
+                    .port(port.getPort()).endpoints(serviceTemplate.getEndpoints())
+                    .version(serviceTemplate.getVersion()).protocol(port.getProtocol()).build())
+                .collect(Collectors.toList());
+        } else {
+            // type:externalName
+            return Collections.singletonList(serviceTemplate);
         }
-
-        if (StringUtils.isNotBlank(v1Service.getMetadata().getResourceVersion())) {
-            result.setVersion(Integer.valueOf(v1Service.getMetadata().getResourceVersion()));
-        }
-        result.setEndpoints(spec.getClusterIPs());
-        return result;
     }
 
     public ServiceSource v1RegistryConfig2ServiceSource(V1RegistryConfig v1RegistryConfig) {

@@ -73,7 +73,7 @@ public class ServiceServiceByApiServerImpl implements ServiceService {
         if (CollectionUtils.isNotEmpty(v1Services)) {
             for (V1Service v1Service : v1Services) {
                 try {
-                    Service service = kubernetesModelConverter.v1Service2Service(v1Service);
+                    List<Service> services = kubernetesModelConverter.v1Service2Service(v1Service);
                     String metaUniqueKey = buildMetaUniqueKey(v1Service.getMetadata());
                     V1Endpoints v1Endpoints1 = null;
                     if (v1EndpointsMap.containsKey(metaUniqueKey)) {
@@ -90,12 +90,12 @@ public class ServiceServiceByApiServerImpl implements ServiceService {
                                     return null;
                                 }).filter(CollectionUtils::isNotEmpty).flatMap(List::stream)
                                     .collect(Collectors.toList());
-                            service.setEndpoints(ipList);
+                            services.forEach(i -> i.setEndpoints(ipList));
                         } catch (Exception e) {
                             log.error("deal service endpoints appear error. ", e);
                         }
                     }
-                    resultList.add(service);
+                    resultList.addAll(services);
                 } catch (Exception e) {
                     log.error("deal service appear error. ", e);
                 }

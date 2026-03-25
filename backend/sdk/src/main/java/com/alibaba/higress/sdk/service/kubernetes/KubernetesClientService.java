@@ -295,9 +295,27 @@ public class KubernetesClientService {
     }
 
     public List<V1Service> listAllServiceList() throws ApiException {
+        return listNamespacedService(null, null);
+    }
+
+    public List<V1Service> listNamespacedService(String namespace, Map<String, String> labelMap) throws ApiException {
+        String labelSelectors = null;
+        if (MapUtils.isNotEmpty(labelMap)) {
+            List<String> labelSelectorsList = labelMap.keySet().stream()
+                .map(key -> buildLabelSelector(key, labelMap.get(key))).collect(Collectors.toList());
+            labelSelectorsList.add(DEFAULT_LABEL_SELECTORS);
+            labelSelectors = String.join(Separators.COMMA, labelSelectorsList);
+        }
         CoreV1Api coreV1Api = new CoreV1Api(client);
-        V1ServiceList v1ServiceList =
-            coreV1Api.listServiceForAllNamespaces(null, null, null, null, null, null, null, null, null, null);
+
+        V1ServiceList v1ServiceList = null;
+        if (StringUtils.isBlank(namespace)) {
+            v1ServiceList = coreV1Api.listServiceForAllNamespaces(null, null, null, labelSelectors, null, null, null,
+                null, null, null);
+        } else {
+            v1ServiceList = coreV1Api.listNamespacedService(namespace, null, null, null, null, labelSelectors, null,
+                null, null, null, null);
+        }
         if (Objects.isNull(v1ServiceList)) {
             return Collections.emptyList();
         }
