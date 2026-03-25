@@ -30,10 +30,15 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Query criteria for mcpServer listing.")
 public class McpServerPageQuery extends CommonPageQuery {
 
-    @Schema(description = "McpServer name associated with route.")
+    @Schema(description = "McpServer name associated with route. It supports fuzzy search.")
     private String mcpServerName;
 
     @Schema(description = "Mcp server type")
     private String type;
 
+    @Schema(description = "Domain name associated with mcp server.")
+    private String domainName;
+
+    @Schema(description = "The destination associated with mcp server route. About: IngressBackend.ServiceBackendPort")
+    private String serviceId;
 }

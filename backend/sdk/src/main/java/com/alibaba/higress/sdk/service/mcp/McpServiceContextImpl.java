@@ -208,6 +208,14 @@ public class McpServiceContextImpl implements McpServerService {
         if (StringUtils.isNotBlank(fuzzyServerName)) {
             resultList.removeIf(mcpServer -> !StringUtils.contains(mcpServer.getName(), fuzzyServerName));
         }
+        if (StringUtils.isNotBlank(query.getDomainName())) {
+            resultList.removeIf(mcpServer -> mcpServer.getDomains().stream()
+                .noneMatch(domainName -> StringUtils.equals(domainName, query.getDomainName())));
+        }
+        if (StringUtils.isNotBlank(query.getServiceId())) {
+            resultList.removeIf(mcpServer -> mcpServer.getServices().stream()
+                .noneMatch(service -> StringUtils.equals(service.getBizId(), query.getServiceId())));
+        }
 
         String type = query.getType();
         if (StringUtils.isNotBlank(type)) {

@@ -12,6 +12,10 @@
  */
 package com.alibaba.higress.sdk.model.route;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.alibaba.higress.sdk.constant.Separators;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,5 +37,9 @@ public class UpstreamService {
 
     public void validate() {
         // TODO: Implement validation logic
+    }
+
+    public String getBizId() {
+        return StringUtils.join(this.name, Separators.COLON, this.port);
     }
 }
